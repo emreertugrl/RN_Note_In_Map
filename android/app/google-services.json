@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "51624338095",
+    "project_id": "haritadanotum-1007a",
+    "storage_bucket": "haritadanotum-1007a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:51624338095:android:79928e928e3c5077c36a5a",
+        "android_client_info": {
+          "package_name": "com.haritadanotum"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjNaS_jA_JeSybNf-49KXn7buUh30O84I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
