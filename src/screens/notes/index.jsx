@@ -8,6 +8,7 @@ import {ADDNOTE} from '../../utils/routes';
 
 const NotesScreen = ({navigation}) => {
   const [notes, setNotes] = useState([]);
+
   const getNotes = () => {
     firestore()
       .collection('Notes')
@@ -24,6 +25,7 @@ const NotesScreen = ({navigation}) => {
             title: documentSnapshot.data().title,
             description: documentSnapshot.data().description,
             time: documentSnapshot.data().time,
+            date: documentSnapshot.data().date,
           });
         });
 

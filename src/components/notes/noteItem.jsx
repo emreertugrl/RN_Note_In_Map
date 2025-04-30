@@ -1,16 +1,21 @@
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {Colors} from '../../theme/colors';
 import {Edit2} from 'iconsax-react-nativejs';
+import {useNavigation} from '@react-navigation/native';
+import {ADDNOTE} from '../../utils/routes';
 
 const NoteItem = ({item}) => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.date}>{item.date}</Text>
         <Text style={styles.description}>{item.description}</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate(ADDNOTE, {updateNote: item})}>
           <Edit2 size={28} color={Colors.BLACK} variant="Bold" />
         </TouchableOpacity>
         <Text style={styles.time}>{item.time}</Text>
@@ -42,6 +47,11 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     marginVertical: 20,
+  },
+  date: {
+    fontSize: 16,
+    color: Colors.GRAY,
+    textAlign: 'left',
   },
   time: {
     fontSize: 16,
