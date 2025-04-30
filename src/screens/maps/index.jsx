@@ -1,5 +1,5 @@
 import {View, StyleSheet} from 'react-native';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps'; // remove PROVIDER_GOOGLE import if not using Google Maps
+import MapView, {Callout, Marker, PROVIDER_GOOGLE} from 'react-native-maps'; // remove PROVIDER_GOOGLE import if not using Google Maps
 import firestore from '@react-native-firebase/firestore';
 import {useEffect, useState} from 'react';
 import {
@@ -7,6 +7,8 @@ import {
   getCurrentLocation,
   defaultLocation,
 } from '../../utils/location';
+import CustomMarker from '../../components/ui/customMarker';
+import CustomCallout from '../../components/ui/customCallout';
 
 const Maps = () => {
   const [notes, setNotes] = useState([]);
@@ -70,15 +72,19 @@ const Maps = () => {
               key={index}
               coordinate={{latitude: lat, longitude: lng}}
               title={marker.title}
-              description={marker.description}
-            />
+              description={marker.description}>
+              <CustomMarker />
+              <Callout tooltip>
+                <CustomCallout marker={marker} />
+              </Callout>
+            </Marker>
           );
         })}
         {currentLocation && (
           <Marker
             coordinate={{
-              latitude: currentLocation.latitude,
               longitude: currentLocation.longitude,
+              latitude: currentLocation.latitude,
             }}
             title="Benim Konumum"
             pinColor="blue" // Mavi renkte marker
