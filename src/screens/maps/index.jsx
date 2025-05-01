@@ -10,7 +10,7 @@ import {
 import CustomMarker from '../../components/ui/customMarker';
 import CustomCallout from '../../components/ui/customCallout';
 import FloatActionButton from '../../components/ui/floatAction';
-import {ArrowRight2, Map} from 'iconsax-react-nativejs';
+import {ArrowRight2, Map, Refresh} from 'iconsax-react-nativejs';
 import {Colors} from '../../theme/colors';
 import {ADDNOTE} from '../../utils/routes';
 import {width} from '../../utils/constans';
@@ -132,6 +132,17 @@ const Maps = ({navigation}) => {
           backgroundColor={Colors.GREEN}
         />
       )}
+      <FloatActionButton
+        onPress={ ()=>getNotes()}
+        customStyle={{
+          top: 20,
+          left: 20,
+          width: width * 0.15,
+          height: width * 0.15,
+        }}
+        icon={<Refresh size={40} color={Colors.BLACK} />}
+        backgroundColor={Colors.WHITE}
+      />
 
       <FloatActionButton
         onPress={toggleMapType}
