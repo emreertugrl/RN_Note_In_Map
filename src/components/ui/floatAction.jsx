@@ -3,11 +3,15 @@ import {Colors} from '../../theme/colors';
 import {width} from '../../utils/constans';
 
 const FloatActionButton = props => {
-  const {icon, backgroundColor = Colors.COLOR2} = props;
+  const {icon, backgroundColor = Colors.COLOR2, customStyle = {}} = props;
   return (
     <TouchableOpacity
       {...props}
-      style={[styles.container, {backgroundColor: backgroundColor}]}>
+      style={[
+        styles.container,
+        {backgroundColor: backgroundColor},
+        customStyle,
+      ]}>
       {icon}
     </TouchableOpacity>
   );

@@ -10,14 +10,16 @@ import {
 import CustomMarker from '../../components/ui/customMarker';
 import CustomCallout from '../../components/ui/customCallout';
 import FloatActionButton from '../../components/ui/floatAction';
-import {ArrowRight2} from 'iconsax-react-nativejs';
+import {ArrowRight2, Map} from 'iconsax-react-nativejs';
 import {Colors} from '../../theme/colors';
 import {ADDNOTE} from '../../utils/routes';
+import {width} from '../../utils/constans';
 
 const Maps = ({navigation}) => {
   const [notes, setNotes] = useState([]);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [coordinate, setCoordinate] = useState(null);
+  const [mapType, setMapType] = useState('standard');
   // console.log(currentLocation);
 
   const getNotes = () => {
@@ -60,6 +62,11 @@ const Maps = ({navigation}) => {
     const {coordinate} = e?.nativeEvent;
     setCoordinate(coordinate);
   };
+  const toggleMapType = () => {
+    setMapType(prevType =>
+      prevType === 'standard' ? 'satellite' : 'standard',
+    );
+  };
   useEffect(() => {
     setupLocation();
     getNotes();
@@ -67,8 +74,11 @@ const Maps = ({navigation}) => {
   return (
     <View style={styles.container}>
       <MapView
-        onPress={handleMarkerPress}
         provider={PROVIDER_GOOGLE}
+        zoomControlEnabled
+        zoomEnabled
+        onPress={handleMarkerPress}
+        mapType={mapType}
         style={styles.map}
         showsUserLocation
         region={currentLocation ? currentLocation : defaultLocation}>
@@ -114,11 +124,30 @@ const Maps = ({navigation}) => {
       </MapView>
       {coordinate && (
         <FloatActionButton
+          customStyle={{
+            right: 60,
+          }}
           onPress={() => navigation.navigate(ADDNOTE, {coordinate: coordinate})}
           icon={<ArrowRight2 size={40} color={Colors.WHITE} />}
           backgroundColor={Colors.GREEN}
         />
       )}
+
+      <FloatActionButton
+        onPress={toggleMapType}
+        customStyle={{
+          top: 20,
+          width: width * 0.15,
+          height: width * 0.15,
+        }}
+        icon={
+          <Map
+            size={40}
+            color={mapType == 'standard' ? Colors.WHITE : Colors.BLACK}
+          />
+        }
+        backgroundColor={mapType == 'standard' ? Colors.GREEN : Colors.WHITE}
+      />
     </View>
   );
 };
