@@ -10,8 +10,9 @@ import {TouchableWithoutFeedback} from '@ui-kitten/components/devsupport';
 import {Eye, EyeSlash} from 'iconsax-react-nativejs';
 import auth from '@react-native-firebase/auth';
 import {Colors} from '../../theme/colors';
-import {LOGIN} from '../../utils/routes';
+import {getFirestore, doc, setDoc} from '@react-native-firebase/firestore';
 import CustomModal from '../../components/ui/modals';
+import {getApp} from '@react-native-firebase/app';
 
 const RegisterScreen = ({navigation}) => {
   const [secureText, setSecureText] = useState(true);
@@ -20,13 +21,43 @@ const RegisterScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(false);
 
+  const createUser = async values => {
+    setLoading(true);
+    const app = getApp();
+    const db = getFirestore(app);
+    // Kullanıcı kimliği (uid) ile Firestore'da belge referansı oluşturuluyor
+    const userRef = doc(db, 'Users', values.uid); // usersRef burada artık unique id ile olacak
+
+    try {
+      // Kullanıcıyı Firestore'a ekliyoruz
+      await setDoc(userRef, values); // setDoc kullanarak 'Users' koleksiyonuna belge ekliyoruz
+      console.log('User added!');
+      setStatus(true);
+    } catch (error) {
+      console.log('Firestore error:', error);
+      setStatus(false);
+    } finally {
+      setVisible(true);
+      setLoading(false);
+    }
+  };
+
   const toggleSecure = () => setSecureText(!secureText);
 
   const registerUser = values => {
     setLoading(true);
     auth()
       .createUserWithEmailAndPassword(values.email, values.password)
-      .then(() => {
+      .then(async () => {
+        const user = auth().currentUser; // Kullanıcı bilgilerini alıyoruz
+        const userValues = {
+          ...values,
+          uid: user.uid, // Kullanıcının uid'sini values objesine ekliyoruz
+        };
+
+        // Kullanıcıyı Firestore'a kaydediyoruz
+        await createUser(userValues);
+
         setStatus(true);
         console.log('Kullanıcı Kaydedildi');
       })
