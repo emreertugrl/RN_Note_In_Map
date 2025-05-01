@@ -1,20 +1,21 @@
-//import liraries
-import {Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {StyleSheet, TouchableOpacity} from 'react-native';
 import {Colors} from '../../theme/colors';
 import {width} from '../../utils/constans';
-import {Add} from 'iconsax-react-nativejs';
 
-// create a component
 const FloatActionButton = props => {
+  const {icon, backgroundColor = Colors.COLOR2} = props;
   return (
-    <TouchableOpacity {...props} style={styles.container}>
-      <Add size={40} color={Colors.WHITE} />
+    <TouchableOpacity
+      {...props}
+      style={[styles.container, {backgroundColor: backgroundColor}]}>
+      {icon}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    zIndex: 999,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.COLOR2,
