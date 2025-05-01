@@ -14,38 +14,40 @@ import Profile from '../screens/profile';
 import Notes from '../screens/notes';
 import AddNote from '../screens/notes/addNote';
 import Maps from '../screens/maps';
-import {Text, View} from 'react-native';
-import {Note1} from 'iconsax-react-nativejs';
+import {TouchableOpacity, View} from 'react-native';
+import {Logout, Note1, Profile as ProfiliIcon} from 'iconsax-react-nativejs';
 import Launch from '../screens/launch';
-import auth from '@react-native-firebase/auth';
 import {useEffect, useState} from 'react';
+import {Colors} from '../theme/colors';
+import {getAuth, signOut} from '@react-native-firebase/auth';
+import {useNavigation} from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
+  const navigation = useNavigation();
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
 
-  function onAuthStateChanged(user) {
+  const userSignOut = () => {
+    const auth = getAuth(); // Yeni modüler API ile auth alıyoruz
+    signOut(auth) // `auth()` yerine `signOut(auth)` kullanıyoruz
+      .then(() => console.log('User signed out!'))
+      .catch(error => console.error('Sign out error: ', error));
+  };
+
+  function handleAuthStateChanged(user) {
     console.log(user);
     setUser(user);
     if (initializing) setInitializing(false);
   }
 
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    const subscriber = getAuth().onAuthStateChanged(handleAuthStateChanged);
+    return subscriber; // Unsubscribe on unmount
   }, []);
 
   if (initializing) return null; //istek çıktığında
-
-  if (!user) {
-    return (
-      <View>
-        <Text>Login</Text>
-      </View>
-    );
-  }
 
   return (
     <Stack.Navigator
@@ -61,10 +63,14 @@ export default function RootNavigator() {
                 <View
                   style={{
                     flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    gap: 10,
+                    paddingRight: 15,
                   }}>
                   <Note1 onPress={() => navigation.navigate(NOTES)} size={30} />
+                  <ProfiliIcon
+                    onPress={() => navigation.navigate(PROFILE)}
+                    size={30}
+                  />
                 </View>
               ),
             })}
@@ -72,7 +78,19 @@ export default function RootNavigator() {
             component={Maps}
           />
           <Stack.Screen name={NOTES} component={Notes} />
-          <Stack.Screen name={PROFILE} component={Profile} />
+          <Stack.Screen
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => userSignOut()}
+                  style={{marginRight: 15}}>
+                  <Logout size={30} color={Colors.RED} />
+                </TouchableOpacity>
+              ),
+            })}
+            name={PROFILE}
+            component={Profile}
+          />
           <Stack.Screen name={ADDNOTE} component={AddNote} />
         </Stack.Group>
       ) : (
