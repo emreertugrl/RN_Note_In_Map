@@ -5,7 +5,7 @@ import {CloseCircle, TickCircle} from 'iconsax-react-nativejs';
 import {useNavigation} from '@react-navigation/native';
 import {Button} from '@ui-kitten/components';
 
-const CustomModal = ({visible, closeModal, status}) => {
+const CustomModal = ({visible, closeModal, status, descSuccess, descError}) => {
   const navigate = useNavigation();
 
   const handleClose = () => {
@@ -31,7 +31,11 @@ const CustomModal = ({visible, closeModal, status}) => {
             </Text>
             <Text style={{marginVertical: 10}}>
               {status
-                ? 'Not ekleme başarılı bir şekilde gerçekleşti.'
+                ? descSuccess
+                  ? descSuccess
+                  : 'Not ekleme başarılı bir şekilde gerçekleşti.'
+                : descError
+                ? descError
                 : 'Not ekleme işlemi başarısız.'}
             </Text>
           </View>

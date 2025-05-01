@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {screenStyle} from '../../styles/screenStyles';
-import {Image, SafeAreaView, View} from 'react-native';
+import {ActivityIndicator, Image, SafeAreaView, Text, View} from 'react-native';
 import {authStyles} from '../../styles/authStyles';
 import {Formik} from 'formik';
 import {registerSchema} from '../../utils/schemas';
@@ -8,14 +8,56 @@ import {Button, Input} from '@ui-kitten/components';
 import {uiElementsStyles} from '../../styles/uiElementsStyles';
 import {TouchableWithoutFeedback} from '@ui-kitten/components/devsupport';
 import {Eye, EyeSlash} from 'iconsax-react-nativejs';
+import auth from '@react-native-firebase/auth';
+import {Colors} from '../../theme/colors';
+import {LOGIN} from '../../utils/routes';
+import CustomModal from '../../components/ui/modals';
 
 const RegisterScreen = ({navigation}) => {
   const [secureText, setSecureText] = useState(true);
+
+  const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(false);
+
   const toggleSecure = () => setSecureText(!secureText);
+
+  const registerUser = values => {
+    setLoading(true);
+    auth()
+      .createUserWithEmailAndPassword(values.email, values.password)
+      .then(() => {
+        setStatus(true);
+        console.log('Kullanıcı Kaydedildi');
+      })
+      .catch(error => {
+        setStatus(false);
+
+        if (error.code === 'auth/email-already-in-use') {
+          console.log('That email address is already in use!');
+        }
+
+        if (error.code === 'auth/invalid-email') {
+          console.log('That email address is invalid!');
+        }
+        console.error(error);
+      })
+      .finally(() => {
+        setVisible(true);
+        setLoading(false);
+      });
+  };
 
   return (
     <SafeAreaView style={screenStyle.safeAreView}>
       <View style={screenStyle.container}>
+        <CustomModal
+          descSuccess={'Kullanıcı Başarıyla Kaydedildi. Lütfen Giriş Yapınız.'}
+          descError={'Kullanıcı kayıt edilemedi!!!'}
+          visible={visible}
+          status={status}
+          closeModal={() => setVisible(false)}
+        />
         <View style={authStyles.imageContainer}>
           <Image
             source={require('../../assets/images/signIn.png')}
@@ -25,14 +67,14 @@ const RegisterScreen = ({navigation}) => {
         <View style={authStyles.textContainer}>
           <Formik
             initialValues={{
-              name: '',
-              email: '',
-              password: '',
+              name: 'Test User1',
+              email: 'test1@gmail.com',
+              password: 'Test123.',
             }}
             validationSchema={registerSchema}
             validateOnBlur={false}
             validateOnChange={false}
-            onSubmit={values => console.log(values)}>
+            onSubmit={values => registerUser(values)}>
             {({
               handleChange,
               handleBlur,
@@ -96,9 +138,14 @@ const RegisterScreen = ({navigation}) => {
                   <Button
                     style={authStyles.loginButton}
                     onPress={handleSubmit}
+                    disabled={loading}
                     status="primary"
                     size="large">
-                    Kayıt Ol
+                    {loading ? (
+                      <ActivityIndicator color={Colors.WHITE} size={'small'} />
+                    ) : (
+                      <Text>Kayıt Ol</Text>
+                    )}
                   </Button>
                 </View>
               </View>

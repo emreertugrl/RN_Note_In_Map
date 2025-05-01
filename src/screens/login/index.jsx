@@ -1,4 +1,4 @@
-import {Image, SafeAreaView, View} from 'react-native';
+import {ActivityIndicator, Image, SafeAreaView, Text, View} from 'react-native';
 import {screenStyle} from '../../styles/screenStyles';
 import {Button, Input} from '@ui-kitten/components';
 import {authStyles} from '../../styles/authStyles';
@@ -8,14 +8,48 @@ import {uiElementsStyles} from '../../styles/uiElementsStyles';
 import {useState} from 'react';
 import {Eye, EyeSlash} from 'iconsax-react-nativejs';
 import {TouchableWithoutFeedback} from '@ui-kitten/components/devsupport';
-
+import auth from '@react-native-firebase/auth';
+import {Colors} from '../../theme/colors';
+import CustomModal from '../../components/ui/modals';
 const LoginScreen = ({navigation}) => {
   const [secureText, setSecureText] = useState(true);
 
+  const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(false);
+
   const toggleSecure = () => setSecureText(!secureText);
+
+  const loginUser = values => {
+    setLoading(true);
+    auth()
+      .signInWithEmailAndPassword(values.email, values.password)
+      .then(() => {
+        setStatus(true);
+        console.log('Kullanıcı başarılı bir şekilde giriş yaptı.');
+      })
+      .catch(error => {
+        setStatus(false);
+        if (error.code === 'auth/invalid-credential') {
+          console.log('Email or password is false!');
+        }
+        console.error(error);
+      })
+      .finally(() => {
+        setVisible(true);
+        setLoading(false);
+      });
+  };
   return (
     <SafeAreaView style={screenStyle.safeAreView}>
       <View style={screenStyle.container}>
+        <CustomModal
+          descSuccess={'Kullanıcı başarıyla giriş yaptı.'}
+          descError={'Kullanıcı giriş yapamadı!!!'}
+          visible={visible}
+          status={status}
+          closeModal={() => setVisible(false)}
+        />
         <View style={authStyles.imageContainer}>
           <Image
             source={require('../../assets/images/signIn.png')}
@@ -25,13 +59,13 @@ const LoginScreen = ({navigation}) => {
         <View style={authStyles.textContainer}>
           <Formik
             initialValues={{
-              email: '',
-              password: '',
+              email: 'test1@gmail.com',
+              password: 'Test123.',
             }}
             validationSchema={loginSchema}
             validateOnBlur={false}
             validateOnChange={false}
-            onSubmit={values => console.log(values)}>
+            onSubmit={values => loginUser(values)}>
             {({
               handleChange,
               handleBlur,
@@ -83,9 +117,14 @@ const LoginScreen = ({navigation}) => {
                   <Button
                     style={authStyles.loginButton}
                     onPress={handleSubmit}
+                    disabled={loading}
                     status="primary"
                     size="large">
-                    Giriş Yap
+                    {loading ? (
+                      <ActivityIndicator color={Colors.WHITE} size={'small'} />
+                    ) : (
+                      <Text>Giriş Yap</Text>
+                    )}
                   </Button>
                 </View>
               </View>
