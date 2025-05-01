@@ -21,6 +21,7 @@ import {useEffect, useState} from 'react';
 import {Colors} from '../theme/colors';
 import {getAuth, signOut} from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,15 +30,26 @@ export default function RootNavigator() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
 
+  const storeData = async value => {
+    // console.log(value);
+    try {
+      await AsyncStorage.setItem('uid', value);
+    } catch (e) {}
+  };
   const userSignOut = () => {
     const auth = getAuth(); // Yeni modüler API ile auth alıyoruz
     signOut(auth) // `auth()` yerine `signOut(auth)` kullanıyoruz
-      .then(() => console.log('User signed out!'))
+      .then(async () => {
+        console.log('User signed out!');
+        AsyncStorage.removeItem('uid');
+      })
       .catch(error => console.error('Sign out error: ', error));
   };
 
   function handleAuthStateChanged(user) {
-    console.log(user);
+    if (user) {
+      storeData(user?.uid);
+    }
     setUser(user);
     if (initializing) setInitializing(false);
   }
