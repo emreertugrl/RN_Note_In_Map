@@ -3,37 +3,52 @@ import {screenStyle} from '../../styles/screenStyles';
 import {Input, Button} from '@ui-kitten/components';
 import {uiElementsStyles} from '../../styles/uiElementsStyles';
 import {Formik} from 'formik';
-import firestore from '@react-native-firebase/firestore';
 import {addNoteSchema} from '../../utils/schemas';
 import CustomModal from '../../components/ui/modals';
 import {useState} from 'react';
 import {Colors} from '../../theme/colors';
 
+import {
+  getFirestore,
+  collection,
+  doc,
+  updateDoc,
+  addDoc,
+} from '@react-native-firebase/firestore';
+import {getApp} from '@react-native-firebase/app';
+
 const AddNote = ({route}) => {
-  const {updateNote} = route?.params || {};
+  const {updateNote, coordinate} = route?.params || {};
+  console.log(coordinate);
 
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(false);
-  const addNote = values => {
-    const noteRef = firestore().collection('Notes');
-    const saveNote = updateNote
-      ? noteRef.doc(updateNote?.id).update(values)
-      : noteRef.add(values);
+  const addNote = async values => {
+    setLoading(true);
+    const app = getApp();
+    const db = getFirestore(app);
+    const notesRef = collection(db, 'Notes');
 
-    saveNote
-      .then(() => {
-        setVisible(true);
-        setLoading(false);
-        setStatus(true);
-        console.log(updateNote ? 'Note updated!' : 'Note added!');
-      })
-      .catch(error => setStatus(false))
-      .finally(() => {
-        setVisible(true);
-        setLoading(false);
-      });
+    try {
+      if (updateNote) {
+        const noteDocRef = doc(db, 'Notes', updateNote.id);
+        await updateDoc(noteDocRef, values);
+        console.log('Note updated!');
+      } else {
+        await addDoc(notesRef, values);
+        console.log('Note added!');
+      }
+      setStatus(true);
+    } catch (error) {
+      console.log('Firestore error:', error);
+      setStatus(false);
+    } finally {
+      setVisible(true);
+      setLoading(false);
+    }
   };
+
   return (
     <View style={screenStyle.container}>
       <CustomModal
@@ -43,11 +58,12 @@ const AddNote = ({route}) => {
       />
       <Formik
         initialValues={{
-          id: updateNote?.id || '',
-          title: updateNote?.title || '',
-          description: updateNote?.title || '',
-          time: updateNote?.title || '',
-          date: updateNote?.title || '',
+          title: updateNote?.title || 'Note-1',
+          description:
+            updateNote?.description || 'Note-1 açıklaması buraya yazılıryor.',
+          time: updateNote?.time || '09:00',
+          date: updateNote?.date || '08.10.2026',
+          coordinate: coordinate || {latitude: 0, longitude: 0},
         }}
         validationSchema={addNoteSchema}
         validateOnBlur={false}

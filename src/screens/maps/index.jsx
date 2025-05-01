@@ -9,11 +9,16 @@ import {
 } from '../../utils/location';
 import CustomMarker from '../../components/ui/customMarker';
 import CustomCallout from '../../components/ui/customCallout';
+import FloatActionButton from '../../components/ui/floatAction';
+import {ArrowRight2} from 'iconsax-react-nativejs';
+import {Colors} from '../../theme/colors';
+import {ADDNOTE} from '../../utils/routes';
 
-const Maps = () => {
+const Maps = ({navigation}) => {
   const [notes, setNotes] = useState([]);
   const [currentLocation, setCurrentLocation] = useState(null);
-  console.log(currentLocation);
+  const [coordinate, setCoordinate] = useState(null);
+  // console.log(currentLocation);
 
   const getNotes = () => {
     firestore()
@@ -50,6 +55,11 @@ const Maps = () => {
       }
     }
   };
+
+  const handleMarkerPress = e => {
+    const {coordinate} = e?.nativeEvent;
+    setCoordinate(coordinate);
+  };
   useEffect(() => {
     setupLocation();
     getNotes();
@@ -57,8 +67,10 @@ const Maps = () => {
   return (
     <View style={styles.container}>
       <MapView
+        onPress={handleMarkerPress}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
+        showsUserLocation
         region={currentLocation ? currentLocation : defaultLocation}>
         {notes.map((marker, index) => {
           // firebase içinde nasıl kaydettiysek burada öyle çağırmamız lazım coordinate.latitude ve coordinate.longitude
@@ -80,17 +92,33 @@ const Maps = () => {
             </Marker>
           );
         })}
+        {coordinate && (
+          <Marker
+            coordinate={{
+              longitude: coordinate?.longitude,
+              latitude: coordinate?.latitude,
+            }}
+            pinColor="green"
+          />
+        )}
         {currentLocation && (
           <Marker
             coordinate={{
-              longitude: currentLocation.longitude,
-              latitude: currentLocation.latitude,
+              longitude: currentLocation?.longitude,
+              latitude: currentLocation?.latitude,
             }}
             title="Benim Konumum"
             pinColor="blue" // Mavi renkte marker
           />
         )}
       </MapView>
+      {coordinate && (
+        <FloatActionButton
+          onPress={() => navigation.navigate(ADDNOTE, {coordinate: coordinate})}
+          icon={<ArrowRight2 size={40} color={Colors.WHITE} />}
+          backgroundColor={Colors.GREEN}
+        />
+      )}
     </View>
   );
 };

@@ -23,7 +23,6 @@ export default function RootNavigator() {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <Add onPress={() => navigation.navigate(ADDNOTE)} size={38} />
               <Note1 onPress={() => navigation.navigate(NOTES)} size={30} />
             </View>
           ),

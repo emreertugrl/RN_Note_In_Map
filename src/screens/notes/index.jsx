@@ -1,36 +1,36 @@
 import {View, Text, StyleSheet, FlatList} from 'react-native';
 import {screenStyle} from '../../styles/screenStyles';
-import firestore from '@react-native-firebase/firestore';
 import {useEffect, useState} from 'react';
 import FloatActionButton from '../../components/ui/floatAction';
 import NoteItem from '../../components/notes/noteItem';
 import {ADDNOTE} from '../../utils/routes';
+import {Add} from 'iconsax-react-nativejs';
+import {Colors} from '../../theme/colors';
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+} from '@react-native-firebase/firestore';
+import {getApp} from '@react-native-firebase/app';
 
 const NotesScreen = ({navigation}) => {
   const [notes, setNotes] = useState([]);
 
-  const getNotes = () => {
-    firestore()
-      .collection('Notes')
-      .get()
-      .then(querySnapshot => {
-        // console.log('Total notes: ', querySnapshot.size);
-
-        let notes = [];
-
-        querySnapshot.forEach(documentSnapshot => {
-          // console.log('Data:', documentSnapshot.id, documentSnapshot.data());
-          notes.push({
-            id: documentSnapshot.id,
-            title: documentSnapshot.data().title,
-            description: documentSnapshot.data().description,
-            time: documentSnapshot.data().time,
-            date: documentSnapshot.data().date,
-          });
-        });
-
-        setNotes(notes);
-      });
+  const getNotes = async () => {
+    const app = getApp();
+    const db = getFirestore(app);
+    const notesCol = collection(db, 'Notes');
+    try {
+      const snapshot = await getDocs(notesCol);
+      const notes = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNotes(notes);
+    } catch (error) {
+      console.error('Failed to fetch notes:', error);
+    }
   };
 
   useEffect(() => {
@@ -44,7 +44,10 @@ const NotesScreen = ({navigation}) => {
         renderItem={({item}) => <NoteItem item={item} />}
         ListEmptyComponent={<Text style={{color: 'gray'}}>Not bulunamadı</Text>}
       />
-      <FloatActionButton onPress={() => navigation.navigate(ADDNOTE)} />
+      <FloatActionButton
+        icon={<Add size={60} color={Colors.WHITE} />}
+        onPress={() => navigation.navigate(ADDNOTE)}
+      />
     </View>
   );
 };
